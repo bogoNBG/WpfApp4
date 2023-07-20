@@ -18,6 +18,13 @@ namespace WpfApp4.ViewModel
             this.contact = contact;
         }
 
+        public int Id
+        {
+            get { return contact.Id; }
+            set { contact.Id = value; }
+        }
+
+
         public string Name
         {
             get { return contact.Name; }

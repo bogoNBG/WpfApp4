@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using WpfApp4.Model;
 using WpfApp4.MVVM;
+using WpfApp4.Repository;
 using System.Windows;
 
 namespace WpfApp4.ViewModel
@@ -18,15 +19,19 @@ namespace WpfApp4.ViewModel
             Options = new ObservableCollection<Option>();
             Placeholder = "Search";
 
-            Contacts.Add(new ContactViewModel(new Contact("Ime", "Nomer", "ImeNomer@email.com")));
-            Contacts.Add(new ContactViewModel(new Contact("Ivan", "0879356194", "ivanivanov@email.com")));
-            Contacts.Add(new ContactViewModel(new Contact("Kaloqn", "02747893", "kaloqnsofiq@abv.bg")));
+            Repository = new MainRepository();
+            Repository.LoadInfo(Contacts);
+            // repository.CreateTable();
+
+            //Contacts.Add(new ContactViewModel(new Contact(1,"Ime", "Nomer", "ImeNomer@email.com")));
+            //Contacts.Add(new ContactViewModel(new Contact(2,"Ivan", "0879356194", "ivanivanov@email.com")));
+            //Contacts.Add(new ContactViewModel(new Contact(3,"Kaloqn", "02747893", "kaloqnsofiq@abv.bg")));
             Options.Add(new Option("Facebook"));
             Options.Add(new Option("Instagram"));
+
+
         }
-
-       
-
+        MainRepository Repository { get; set; }
         public ObservableCollection<ContactViewModel> Contacts { get; set; }
         public ObservableCollection<Option> Options { get; set; }
 
@@ -148,13 +153,14 @@ namespace WpfApp4.ViewModel
 
         private void AddContact()
         {
-            Contacts.Add(new ContactViewModel(new Contact(this.Name,this.Number,this.Email)));
-
+            Contact contact = new Contact(IdGenerator.GetNextId<Contact>(), this.Name, this.Number, this.Email);
+            Contacts.Add(new ContactViewModel(contact));
+            Repository.AddRow(contact);
             Name = "";
             Number = "";
             Email = "";
         }
-
+        //nigga balls
         private bool CanAddContact()
         {
             if (!string.IsNullOrWhiteSpace(Name) & !string.IsNullOrWhiteSpace(Number) && !string.IsNullOrWhiteSpace(Email))
@@ -166,8 +172,9 @@ namespace WpfApp4.ViewModel
 
         private void RemoveContact()
         {
+            Repository.DeleteRow(SelectedContact);
             Contacts.Remove(SelectedContact);
-
+            
             Name = "";
             Number = "";
             Email = "";
