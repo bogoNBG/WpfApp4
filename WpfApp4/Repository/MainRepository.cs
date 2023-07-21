@@ -26,7 +26,7 @@ namespace WpfApp4.Repository
         }
         public void CreateTable()
         {
-            commandLine = "create table Contacts (ID integer, NAME text, NUMBER text, EMAIL text);";
+            commandLine = "create table Links (ID integer, [CONTACT ID] integer, [OPTION ID] integer, NAME text);";
             ConnectToTable(commandLine);
         }
 
@@ -39,18 +39,76 @@ namespace WpfApp4.Repository
         {
             commandLine = $"delete from Contacts where ID={contact.Id};";
             ConnectToTable(commandLine);
-
+        }
+        public void UpdateRow(ContactViewModel contact)
+        {
+            commandLine = $"update Contacts set NAME='{contact.Name}', NUMBER='{contact.Number}', EMAIL='{contact.Email}' where ID={contact.Id}";
+            ConnectToTable(commandLine);
         }
 
-        public void LoadInfo(ObservableCollection<ContactViewModel> contacts)
+        public void AddOption(Option option)
+        {
+            commandLine = $"insert into Options (ID, NAME) values ({option.Id}, '{option.Name}');";
+            ConnectToTable(commandLine);
+        }
+
+        public void RemoveOption(Option option)
+        {
+            commandLine = $"delete from Options where ID='{option.Id}'";
+            ConnectToTable(commandLine);
+        }
+
+        public void AddLink(Link link)
+        {
+            commandLine = $"insert into Links (ID, [CONTACT ID], [OPTION ID], NAME) VALUES ({link.Id}, {link.ContactId}, {link.OptionId}, '{link.Name}')";
+            ConnectToTable(commandLine);
+        }
+
+        public void RemoveLink(Link link)
+        {
+            commandLine = $"delete from Links where ID={link.Id};";
+            ConnectToTable(commandLine);
+        }
+
+        public void UpdateLink(Link link)
+        {
+            commandLine = $"update Links set NAME='{link.Name}' where ID={link.Id}";
+            ConnectToTable(commandLine);
+        }
+
+        public void RemoveLinksFromContact(ContactViewModel contact)
+        {
+            commandLine = $"delete from Links where [CONTACT ID]={contact.Id};";
+            ConnectToTable(commandLine);
+        }
+
+        public void RemoveLinksFromOptions(Option option)
+        {
+            commandLine = $"delete from Links where [OPTION ID]={option.Id};";
+            ConnectToTable(commandLine);
+        }
+
+        public void LoadInfo(ObservableCollection<ContactViewModel> contacts, ObservableCollection<Option> options)
         {
             using (SQLiteConnection connection = new SQLiteConnection(dbfile))
             {
                 connection.Open();
 
                 string queryContacts = "SELECT ID, NAME, NUMBER, EMAIL FROM Contacts;";
+                string queryOptions = "SELECT ID, NAME FROM Options;";
 
                 SQLiteCommand commandContacts = new(queryContacts, connection);
+                SQLiteCommand commandOptions = new(queryOptions, connection);
+
+                SQLiteDataReader readerOptions = commandOptions.ExecuteReader();
+                while (readerOptions.Read())
+                {
+                    int id = readerOptions.GetInt32(0);
+                    string name = readerOptions.GetString(1);
+                    Option option = new Option(id, name);
+                    options.Add(option);
+                }
+
 
                 SQLiteDataReader readerContacts = commandContacts.ExecuteReader();
                 while (readerContacts.Read())
@@ -64,22 +122,51 @@ namespace WpfApp4.Repository
                     Contact contact = new Contact(id, name, number, email);
 
 
-                    //string queryLinks = $"SELECT ID, [CONTACT ID], [OPTION ID], LINK FROM Links WHERE [CONTACT ID] = {contact.Id};";
-                    //SQLiteCommand commandLinks = new(queryLinks, connection);
-                    //using SQLiteDataReader readerLinks = commandLinks.ExecuteReader();
-                    //while (readerLinks.Read())
-                    //{
-                    //    int key = readerLinks.GetInt32(2);
+                    string queryLinks = $"SELECT ID, [CONTACT ID], [OPTION ID], NAME FROM Links WHERE [CONTACT ID] = {contact.Id};";
+                    SQLiteCommand commandLinks = new(queryLinks, connection);
+                    using SQLiteDataReader readerLinks = commandLinks.ExecuteReader();
+                    while (readerLinks.Read())
+                    {
+                        int linkId = readerLinks.GetInt32(0);
+                        int contactId = readerLinks.GetInt32(1);
+                        int optionId = readerLinks.GetInt32(2);
+                        string linkName = readerLinks.GetString(3);
 
-                    //    if (!contact.Links.ContainsKey(key))
-                    //    {
-                    //        contact.Links[key] = new List<string>();
-                    //    }
-
-                    //    contact.Links[key].Add(readerLinks.GetString(3));
-                    //}
+                        contact.Links.Add(new Link(linkId, contactId, optionId, linkName));
+                    }
 
                     contacts.Add(new ContactViewModel(contact));
+                }
+            }
+        }
+
+        public int IdNum(string table)
+        {
+
+            using SQLiteConnection connection = new(dbfile);
+            connection.Open();
+
+            using (SQLiteCommand command = new SQLiteCommand($"SELECT ID FROM {table}", connection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    List<int> ids = new List<int>();
+
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        ids.Add(id);
+                    }
+
+                    for (int i = 1; i <= ids.Count + 1; i++)
+                    {
+                        if (!ids.Contains(i))
+                        {
+                            return i;
+                        }
+                    }
+
+                    return ids.Count + 1;
                 }
             }
         }

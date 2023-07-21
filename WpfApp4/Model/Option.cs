@@ -11,9 +11,9 @@ namespace WpfApp4.Model
         public int Id { get; set; }        
         public string Name { get; set; }
 
-        public Option(string name)
+        public Option(int id, string name)
         {
-            this.Id = IdGenerator.GetNextId<Option>();
+            this.Id = id;
             this.Name = name;
         }
     }

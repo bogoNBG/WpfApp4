@@ -20,15 +20,8 @@ namespace WpfApp4.ViewModel
             Placeholder = "Search";
 
             Repository = new MainRepository();
-            Repository.LoadInfo(Contacts);
-            // repository.CreateTable();
-
-            //Contacts.Add(new ContactViewModel(new Contact(1,"Ime", "Nomer", "ImeNomer@email.com")));
-            //Contacts.Add(new ContactViewModel(new Contact(2,"Ivan", "0879356194", "ivanivanov@email.com")));
-            //Contacts.Add(new ContactViewModel(new Contact(3,"Kaloqn", "02747893", "kaloqnsofiq@abv.bg")));
-            Options.Add(new Option("Facebook"));
-            Options.Add(new Option("Instagram"));
-
+            Repository.LoadInfo(Contacts, Options);
+            //Repository.CreateTable();
 
         }
         MainRepository Repository { get; set; }
@@ -153,7 +146,7 @@ namespace WpfApp4.ViewModel
 
         private void AddContact()
         {
-            Contact contact = new Contact(IdGenerator.GetNextId<Contact>(), this.Name, this.Number, this.Email);
+            Contact contact = new Contact(Repository.IdNum("Contacts"), this.Name, this.Number, this.Email);
             Contacts.Add(new ContactViewModel(contact));
             Repository.AddRow(contact);
             Name = "";
@@ -173,8 +166,9 @@ namespace WpfApp4.ViewModel
         private void RemoveContact()
         {
             Repository.DeleteRow(SelectedContact);
+            Repository.RemoveLinksFromContact(SelectedContact);
             Contacts.Remove(SelectedContact);
-            
+
             Name = "";
             Number = "";
             Email = "";
@@ -189,7 +183,9 @@ namespace WpfApp4.ViewModel
 
         private void AddOption()
         {
-            Options.Add(new Option(this.OptionName));
+            Option option = new Option(Repository.IdNum("Options"), this.OptionName);
+            Options.Add(option);
+            Repository.AddOption(option);
             OptionName = "";
         }
         private bool CanAddOption()
@@ -218,8 +214,10 @@ namespace WpfApp4.ViewModel
 
                 contact.Links = newLinks;
             }
-
+            Repository.RemoveLinksFromOptions(SelectedOption);
+            Repository.RemoveOption(SelectedOption);
             Options.Remove(SelectedOption);
+            
         }
 
             private bool CanRemoveOption()
@@ -248,9 +246,10 @@ namespace WpfApp4.ViewModel
 
         private void AddLink()
         {
-            SelectedContact.Links.Add(new Link(SelectedOption.Id,LinkName));
-            LinkName = "";
-            
+            Link link = new Link(Repository.IdNum("Links"), SelectedContact.Id, SelectedOption.Id, LinkName);
+            SelectedContact.Links.Add(link);
+            Repository.AddLink(link);
+            LinkName = "";            
         }
         private bool CanAddLink()
         {
@@ -267,7 +266,19 @@ namespace WpfApp4.ViewModel
             SelectedContact.Number = Number;
             SelectedContact.Email = Email;
 
-            SelectedContact.Links.RemoveAll(link => link.Name == "");
+            Repository.UpdateRow(SelectedContact);
+
+            var linksCopy = new List<Link>(SelectedContact.Links);
+            foreach (Link link in SelectedContact.Links)
+            {
+                if (link.Name == "")
+                {
+                    linksCopy.Remove(link);
+                    Repository.RemoveLink(link);
+                }
+                Repository.UpdateLink(link);
+            }
+            SelectedContact.Links= linksCopy;
 
             SelectedContact = null;
 
