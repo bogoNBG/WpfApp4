@@ -112,7 +112,9 @@
                                         </TextBlock.Text>
                                     </TextBlock>
                                     <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0"/>
+                                    
                                 </StackPanel>
+                                <Button Content="+" Width="50"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
