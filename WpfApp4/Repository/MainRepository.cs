@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,10 +25,43 @@ namespace WpfApp4.Repository
                 command.ExecuteNonQuery();
             }
         }
-        public void CreateTable()
+
+        bool Check(string tableName)
         {
-            commandLine = "create table Links (ID integer, [CONTACT ID] integer, [OPTION ID] integer, NAME text);";
-            ConnectToTable(commandLine);
+            using (SQLiteConnection connection = new SQLiteConnection(dbfile))
+            {
+                connection.Open();
+
+                string checkTableQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name=@TableName;";
+                using (SQLiteCommand command = new SQLiteCommand(checkTableQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@TableName", tableName);
+
+                    object result = command.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        public void CreateTables()
+        {
+
+            if ( !(Check("Contacts") && Check("Options") && Check("Links")) )
+            {
+                commandLine = "create table Contacts (ID integer, NAME text, NUMBER text, EMAIL text);";
+                ConnectToTable(commandLine);
+                commandLine = "create table Options (ID integer, NAME text);";
+                ConnectToTable(commandLine);
+                commandLine = "create table Links (ID integer, [CONTACT ID] integer, [OPTION ID] integer, NAME text);";
+                ConnectToTable(commandLine);
+            }
         }
 
         public void AddRow(Contact contact)

@@ -13,16 +13,16 @@ namespace WpfApp4.ViewModel
     internal class MainWindowViewModel : ViewModelBase
     {
         public MainWindowViewModel()
-        {
+        {            
             Contacts = new ObservableCollection<ContactViewModel>();
             ShownContacts = Contacts;
             Options = new ObservableCollection<Option>();
             Placeholder = "Search";
 
             Repository = new MainRepository();
+            Repository.CreateTables();
             Repository.LoadInfo(Contacts, Options);
-            //Repository.CreateTable();
-
+            
         }
         MainRepository Repository { get; set; }
         public ObservableCollection<ContactViewModel> Contacts { get; set; }
@@ -238,7 +238,7 @@ namespace WpfApp4.ViewModel
             else
             {
                 ShownContacts = new ObservableCollection<ContactViewModel>
-                    (Contacts.Where(c => c.Name.Contains(SearchedContact))
+                    (Contacts.Where(c => c.Name.ToLower().Contains(SearchedContact.ToLower()))
                     
                 ) ;
             }
