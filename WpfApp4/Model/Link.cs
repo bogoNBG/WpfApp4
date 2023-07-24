@@ -10,6 +10,7 @@ namespace WpfApp4.Model
     {
         public int Id { get; set; }
         public int ContactId { get; set; }
+
         public int OptionId { get; set; }
         public string Name { get; set; }
 
@@ -20,6 +21,5 @@ namespace WpfApp4.Model
             this.OptionId = optionId;
             this.Name = name;
         }
-
     }
 }

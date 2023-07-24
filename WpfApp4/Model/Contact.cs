@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WpfApp4.MVVM;
-
+using WpfApp4.ViewModel;
 
 namespace WpfApp4.Model
 {
-    internal class Contact : ViewModelBase
+    internal class Contact
     {
         public int Id { get; set; }
         public string Name { get; set; }       

@@ -28,7 +28,7 @@ namespace WpfApp4.ViewModel
         public ObservableCollection<ContactViewModel> Contacts { get; set; }
         public ObservableCollection<Option> Options { get; set; }
 
-        public RelayCommand AddContactCommand => new(execution => AddContact(), canExecute => CanAddContact());
+        public RelayCommand AddContactCommand => new(execution => AddContact());
         public RelayCommand RemoveContactCommand => new(execution => RemoveContact(), canExecute => CanRemoveContact());
         public RelayCommand AddOptionCommand => new(execution => AddOption(), canExecute => CanAddOption());
         public RelayCommand RemoveOptionCommand => new(execution => RemoveOption(), canExecute => CanRemoveOption());
@@ -68,6 +68,28 @@ namespace WpfApp4.ViewModel
                 OnPropertyChanged();
             }
         }
+
+        private bool isAddContactSelected;
+
+        public bool IsAddContactSelected
+        {
+            get { return isAddContactSelected; }
+            set { isAddContactSelected = value; }
+        }
+
+        private string addContactText;
+
+        public string AddContactText
+        {
+            get { return addContactText; }
+            set
+            {
+                addContactText = value;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         private string optionName;
         public string OptionName
@@ -127,7 +149,8 @@ namespace WpfApp4.ViewModel
                     Number = SelectedContact.Number;
                     Email = SelectedContact.Email;
                 }
-                
+                IsAddContactSelected = false;
+                AddContactText = "";
                 OnPropertyChanged();
             }
 		}
@@ -143,25 +166,16 @@ namespace WpfApp4.ViewModel
             }
         }
 
-
         private void AddContact()
         {
-            Contact contact = new Contact(Repository.IdNum("Contacts"), this.Name, this.Number, this.Email);
-            Contacts.Add(new ContactViewModel(contact));
-            Repository.AddRow(contact);
+            SelectedContact = null;
             Name = "";
             Number = "";
             Email = "";
+            IsAddContactSelected = true;
+            AddContactText = "Adding new contact:";
         }
         //nigga balls
-        private bool CanAddContact()
-        {
-            if (!string.IsNullOrWhiteSpace(Name) & !string.IsNullOrWhiteSpace(Number) && !string.IsNullOrWhiteSpace(Email))
-            {
-                return true;
-            }
-            return false;
-        }
 
         private void RemoveContact()
         {
@@ -202,9 +216,9 @@ namespace WpfApp4.ViewModel
             var contactsCopy = new List<ContactViewModel>(Contacts);
             foreach (ContactViewModel contact in contactsCopy)
             {
-                var newLinks = new List<Link>(contact.Links);
+                var newLinks = new List<LinkViewModel>(contact.Links);
 
-                foreach (Link link in contact.Links)
+                foreach (LinkViewModel link in contact.Links)
                 {
                     if (link.OptionId == SelectedOption.Id)
                     {
@@ -244,51 +258,71 @@ namespace WpfApp4.ViewModel
             }
         }
 
+        //private void AddLink()
+        //{
+        //    Link link = new Link(Repository.IdNum("Links"), SelectedContact.Id, SelectedOption.Id, LinkName);
+        //    SelectedContact.Links.Add(link);
+        //    Repository.AddLink(link);
+        //    LinkName = "";            
+        //}
+
         private void AddLink()
         {
-            Link link = new Link(Repository.IdNum("Links"), SelectedContact.Id, SelectedOption.Id, LinkName);
-            SelectedContact.Links.Add(link);
-            Repository.AddLink(link);
-            LinkName = "";            
+            Link link = new(Repository.IdNum("Links"), SelectedContact.Id, 0, " ");
+            SelectedContact.Links.Add(new LinkViewModel(link));
+            Repository.AddLink(new LinkViewModel(link));
         }
         private bool CanAddLink()
         {
-            if(SelectedContact != null && SelectedOption != null && !string.IsNullOrWhiteSpace(LinkName))
-            {
-                return true;
-            }
+            if (SelectedContact != null) return true;
             return false;
         }
 
         private void SaveContact()
         {
-            SelectedContact.Name = Name;
-            SelectedContact.Number = Number;
-            SelectedContact.Email = Email;
-
-            Repository.UpdateRow(SelectedContact);
-
-            var linksCopy = new List<Link>(SelectedContact.Links);
-            foreach (Link link in SelectedContact.Links)
+            if(IsAddContactSelected ==  false) 
             {
-                if (link.Name == "")
+                SelectedContact.Name = Name;
+                SelectedContact.Number = Number;
+                SelectedContact.Email = Email;
+
+                Repository.UpdateRow(SelectedContact);
+
+                var linksCopy = new List<LinkViewModel>(SelectedContact.Links);
+                foreach (LinkViewModel link in SelectedContact.Links)
                 {
-                    linksCopy.Remove(link);
-                    Repository.RemoveLink(link);
+                    if (link.Name == "")
+                    {
+                        linksCopy.Remove(link);
+                        Repository.RemoveLink(link);
+                    }
+                    Repository.UpdateLink(link);
                 }
-                Repository.UpdateLink(link);
+                SelectedContact.Links = linksCopy;
+
+                SelectedContact = null;
+
+                Name = "";
+                Number = "";
+                Email = "";
             }
-            SelectedContact.Links= linksCopy;
+            else
+            {
+                Contact contact = new Contact(Repository.IdNum("Contacts"), this.Name, this.Number, this.Email);
+                Contacts.Add(new ContactViewModel(contact));
+                Repository.AddRow(contact);
+                Name = "";
+                Number = "";
+                Email = "";
+                IsAddContactSelected = false;
+                AddContactText = "";
+            }
 
-            SelectedContact = null;
-
-            Name = "";
-            Number = "";
-            Email = "";
         }
         private bool CanSaveContact()
         {
-            if (SelectedContact != null) return true;
+            if (SelectedContact != null || (IsAddContactSelected == true && !string.IsNullOrWhiteSpace(Name) &&
+                !string.IsNullOrWhiteSpace(Number) && !string.IsNullOrWhiteSpace(Email))) return true;
             else return false;
         }
 

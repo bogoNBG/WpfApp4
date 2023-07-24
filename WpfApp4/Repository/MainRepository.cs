@@ -92,19 +92,19 @@ namespace WpfApp4.Repository
             ConnectToTable(commandLine);
         }
 
-        public void AddLink(Link link)
+        public void AddLink(LinkViewModel link)
         {
             commandLine = $"insert into Links (ID, [CONTACT ID], [OPTION ID], NAME) VALUES ({link.Id}, {link.ContactId}, {link.OptionId}, '{link.Name}')";
             ConnectToTable(commandLine);
         }
 
-        public void RemoveLink(Link link)
+        public void RemoveLink(LinkViewModel link)
         {
             commandLine = $"delete from Links where ID={link.Id};";
             ConnectToTable(commandLine);
         }
 
-        public void UpdateLink(Link link)
+        public void UpdateLink(LinkViewModel link)
         {
             commandLine = $"update Links set NAME='{link.Name}' where ID={link.Id}";
             ConnectToTable(commandLine);
@@ -166,7 +166,7 @@ namespace WpfApp4.Repository
                         int optionId = readerLinks.GetInt32(2);
                         string linkName = readerLinks.GetString(3);
 
-                        contact.Links.Add(new Link(linkId, contactId, optionId, linkName));
+                        contact.Links.Add(new LinkViewModel(new Link(linkId, contactId, optionId, linkName)));
                     }
 
                     contacts.Add(new ContactViewModel(contact));

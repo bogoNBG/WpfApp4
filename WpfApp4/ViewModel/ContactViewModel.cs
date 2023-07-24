@@ -33,7 +33,7 @@ namespace WpfApp4.ViewModel
                 if (contact.Name != value)
                 {
                     contact.Name = value;
-                    OnPropertyChanged(nameof(Name));
+                    OnPropertyChanged();
                 }
             }
         }
@@ -46,7 +46,7 @@ namespace WpfApp4.ViewModel
                 if (contact.Number != value)
                 {
                     contact.Number = value;
-                    OnPropertyChanged(nameof(contact.Number));
+                    OnPropertyChanged();
                 }
             }
         }
@@ -59,12 +59,12 @@ namespace WpfApp4.ViewModel
                 if (contact.Email != value)
                 {
                     contact.Email = value;
-                    OnPropertyChanged(nameof(contact.Email));
+                    OnPropertyChanged();
                 }
             }
         }
 
-        public List<Link> Links
+        public List<LinkViewModel> Links
         {
             get { return contact.Links; }
             set
@@ -72,7 +72,7 @@ namespace WpfApp4.ViewModel
                 if (contact.Links != value)
                 {
                     contact.Links = value;
-                    OnPropertyChanged(nameof(contact.Links));
+                    OnPropertyChanged();
                 }
             }
         }
