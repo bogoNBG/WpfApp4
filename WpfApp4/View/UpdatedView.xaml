@@ -22,9 +22,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="10"/>
-            <RowDefinition Height=".60*"/>
+            <RowDefinition Height=".70*"/>
             <RowDefinition Height="10"/>
-            <RowDefinition Height=".40*" MaxHeight="300"/>
+            <RowDefinition Height=".30*" MaxHeight="200"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
 
@@ -138,23 +138,18 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Select Option:" Margin="10,0,0,0"/>
+                <TextBlock Text="Select option to remove:" Margin="10,0,0,0"/>
                 <ComboBox ItemsSource="{Binding Options}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedOption}" Height="30" Margin="10,0,10,15"/>
+                <Button x:Name="btnRemoveOption" Content="Remove" Command="{Binding RemoveOptionCommand}" Height="30" Width="120"/>
 
-                <TextBlock Text="Link" Margin="10,0,0,0"/>
-                <TextBox Margin="10,0,10,15" Text="{Binding LinkName, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button x:Name="btnAddLink" Content="Add Link" Command="{Binding AddLinkCommand}" Height="30" Margin="10,10,10,0"/>
             </StackPanel>
 
             <Rectangle Grid.Column="1" Fill="LightGray"/>
 
             <StackPanel Grid.Column="2">
-                <TextBlock Text="Option" Margin="10,0,0,0"/>
-                <TextBox Margin="10,0,10,15" Text="{Binding OptionName, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Button x:Name="btnAddOption" Content="Add Option" Command="{Binding AddOptionCommand}" Height="30" Margin="10,10,10,0"/>
-                <Button x:Name="btnRemoveOption" Content="Remove Option" Command="{Binding RemoveOptionCommand}" Height="30" Margin="10,10,10,0"/>
-                
+                <TextBlock Text="Add new option:" Margin="10,0,0,0"/>
+                <TextBox Margin="10,5,10,20" Text="{Binding OptionName, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button x:Name="btnAddOption" Content="Add" Command="{Binding AddOptionCommand}" Height="30" Width="120"/>
             </StackPanel>
 
         </Grid>
