@@ -288,10 +288,10 @@ namespace WpfApp4.ViewModel
 
                 foreach (LinkViewModel link in this.SelectedContact.Links)
                 {
-                    if (link.Value == "")
+                    if (string.IsNullOrWhiteSpace(link.Value))
                     {
                         Repository.RemoveLink(link);
-                        this.SelectedContact.Links.Remove(link);
+                        //this.SelectedContact.Links.Remove(link);
                     }
                     else if(link.Value != "")
                     {

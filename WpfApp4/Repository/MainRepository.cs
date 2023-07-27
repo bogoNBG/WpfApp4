@@ -22,8 +22,11 @@ namespace WpfApp4.Repository
             using SQLiteConnection connection = new SQLiteConnection(dbfile);
             {
                 connection.Open();
-                SQLiteCommand command = new SQLiteCommand(commandLine, connection);
-                command.ExecuteNonQuery();
+                using (SQLiteCommand command = new SQLiteCommand(commandLine, connection)) 
+                { 
+                    command.ExecuteNonQuery(); 
+                }
+                
             }
         }
 
@@ -117,20 +120,22 @@ namespace WpfApp4.Repository
             {
                 connection.Open();
                 SQLiteCommand cmd = new SQLiteCommand($"select * from Links where [CONTACT ID] = {contact.Id}", connection);
-                SQLiteDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
-                    int id = reader.GetInt32(0);
-                    int contactId = reader.GetInt32(1);
-                    int optionId = reader.GetInt32(2);
-                    string name = reader.GetString(3);
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        int contactId = reader.GetInt32(1);
+                        int optionId = reader.GetInt32(2);
+                        string name = reader.GetString(3);
 
-                    Link link = new Link(id, contactId, optionId, name);
-                    LinkViewModel link2 = new(link, this);
-                    links.Add(link2);
-                    contact.Links.Add(link);//dsadsa
-                    
+                        Link link = new Link(id, contactId, optionId, name);
+                        LinkViewModel link2 = new(link, this);
+                        links.Add(link2);
+                        contact.Links.Add(link);//dsadsa
+                    }
                 }
+                
             }
         }
 
@@ -143,15 +148,18 @@ namespace WpfApp4.Repository
                 string queryOptions = "SELECT ID, NAME FROM Options;";
                 SQLiteCommand commandOptions = new(queryOptions, connection);
 
-                SQLiteDataReader readerOptions = commandOptions.ExecuteReader();
-                while (readerOptions.Read())
+                using (SQLiteDataReader readerOptions = commandOptions.ExecuteReader())
                 {
-                    int id = readerOptions.GetInt32(0);
-                    string name = readerOptions.GetString(1);
+                    while (readerOptions.Read())
+                    {
+                        int id = readerOptions.GetInt32(0);
+                        string name = readerOptions.GetString(1);
 
-                    Option option = new(id, name);
-                    options.Add(new OptionViewModel(option));
+                        Option option = new(id, name);
+                        options.Add(new OptionViewModel(option));
+                    }
                 }
+                
             }
         }
 
@@ -164,15 +172,16 @@ namespace WpfApp4.Repository
                 string queryOptions = $"SELECT ID, NAME FROM Options where id = {optionId};";
                 SQLiteCommand commandOptions = new(queryOptions, connection);
 
-                SQLiteDataReader readerOptions = commandOptions.ExecuteReader();
-                while (readerOptions.Read())
+                using (SQLiteDataReader readerOptions = commandOptions.ExecuteReader())
                 {
-                    int id = readerOptions.GetInt32(0);
-                    string name = readerOptions.GetString(1);
+                    while (readerOptions.Read())
+                    {
+                        int id = readerOptions.GetInt32(0);
+                        string name = readerOptions.GetString(1);
 
-                    return new Option(id, name);
-                }
-
+                        return new Option(id, name);
+                    }
+                }               
                 return null;
             }
         }
@@ -187,17 +196,19 @@ namespace WpfApp4.Repository
                 SQLiteCommand commandContacts = new(queryContacts, connection);
 
 
-                SQLiteDataReader readerContacts = commandContacts.ExecuteReader();
-                while (readerContacts.Read())
+                using (SQLiteDataReader readerContacts = commandContacts.ExecuteReader())
                 {
-                    int id = readerContacts.GetInt32(0);
-                    string name = readerContacts.GetString(1);
-                    string number = readerContacts.GetString(2);
-                    string email = readerContacts.GetString(3);
+                    while (readerContacts.Read())
+                    {
+                        int id = readerContacts.GetInt32(0);
+                        string name = readerContacts.GetString(1);
+                        string number = readerContacts.GetString(2);
+                        string email = readerContacts.GetString(3);
 
-                    Contact contact = new Contact(id, name, number, email);
-                    contacts.Add(new ContactViewModel(contact, this));
-                }
+                        Contact contact = new Contact(id, name, number, email);
+                        contacts.Add(new ContactViewModel(contact, this));
+                    }
+                }                    
             }
         }
 
@@ -227,43 +238,51 @@ namespace WpfApp4.Repository
                 SQLiteCommand commandContacts = new(queryContacts, connection);
                 SQLiteCommand commandOptions = new(queryOptions, connection);
 
-                SQLiteDataReader readerOptions = commandOptions.ExecuteReader();
-                while (readerOptions.Read())
+                using (SQLiteDataReader readerOptions = commandOptions.ExecuteReader())
                 {
-                    int id = readerOptions.GetInt32(0);
-                    string name = readerOptions.GetString(1);
-                    Option option = new Option(id, name);
-                    options.Add(new OptionViewModel(option));
-                }
-
-
-                SQLiteDataReader readerContacts = commandContacts.ExecuteReader();
-                while (readerContacts.Read())
-                {
-
-                    int id = readerContacts.GetInt32(0);
-                    string name = readerContacts.GetString(1);
-                    string number = readerContacts.GetString(2);
-                    string email = readerContacts.GetString(3);
-
-                    Contact contact = new(id, name, number, email);
-
-
-                    string queryLinks = $"SELECT ID, [CONTACT ID], [OPTION ID], NAME FROM Links WHERE [CONTACT ID] = {contact.Id};";
-                    SQLiteCommand commandLinks = new(queryLinks, connection);
-                    using SQLiteDataReader readerLinks = commandLinks.ExecuteReader();
-                    while (readerLinks.Read())
+                    while (readerOptions.Read())
                     {
-                        int linkId = readerLinks.GetInt32(0);
-                        int contactId = readerLinks.GetInt32(1);
-                        int optionId = readerLinks.GetInt32(2);
-                        string linkName = readerLinks.GetString(3);
-
-                        contact.Links.Add(new Link(linkId, contactId, optionId, linkName));
+                        int id = readerOptions.GetInt32(0);
+                        string name = readerOptions.GetString(1);
+                        Option option = new Option(id, name);
+                        options.Add(new OptionViewModel(option));
                     }
-
-                    contacts.Add(new ContactViewModel(contact, this));
                 }
+
+
+
+                using (SQLiteDataReader readerContacts = commandContacts.ExecuteReader())
+                {
+                    while (readerContacts.Read())
+                    {
+
+                        int id = readerContacts.GetInt32(0);
+                        string name = readerContacts.GetString(1);
+                        string number = readerContacts.GetString(2);
+                        string email = readerContacts.GetString(3);
+
+                        Contact contact = new(id, name, number, email);
+
+
+                        string queryLinks = $"SELECT ID, [CONTACT ID], [OPTION ID], NAME FROM Links WHERE [CONTACT ID] = {contact.Id};";
+                        SQLiteCommand commandLinks = new(queryLinks, connection);
+                        using (SQLiteDataReader readerLinks = commandLinks.ExecuteReader())
+                        {
+                            while (readerLinks.Read())
+                            {
+                                int linkId = readerLinks.GetInt32(0);
+                                int contactId = readerLinks.GetInt32(1);
+                                int optionId = readerLinks.GetInt32(2);
+                                string linkName = readerLinks.GetString(3);
+
+                                contact.Links.Add(new Link(linkId, contactId, optionId, linkName));
+                            }
+                        }                        
+
+                        contacts.Add(new ContactViewModel(contact, this));
+                    }
+                }
+                    
             }
         }       
     }
