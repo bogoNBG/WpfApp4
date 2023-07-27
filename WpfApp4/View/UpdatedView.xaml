@@ -101,28 +101,6 @@
 
             <TextBlock Grid.Column="1" Text="Links:" Margin="10,0,0,5"/>
 
-            <!--<Border Grid.Column="1"  BorderBrush="LightGray" BorderThickness="4" Margin="10,20,10,20">
-                <ScrollViewer  Grid.Column="1" VerticalScrollBarVisibility="Auto" Margin="5,10,5,10">
-                    <ItemsControl ItemsSource="{Binding SelectedContact.Links, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,10,15">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,0,0,5">
-                                    <TextBlock FontWeight="Bold">
-                                        <TextBlock.Text>
-                                            <MultiBinding Converter="{StaticResource AdditionalInfoConverter}">
-                                                <Binding Path="OptionId" />
-                                                <Binding Path="DataContext.Options" RelativeSource="{RelativeSource AncestorType={x:Type Window}}" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Border>-->
-
             <Border Grid.Column="1" BorderBrush="LightGray" BorderThickness="4" Margin="10,20,10,20">
                 <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Margin="5,10,5,10">
                     <StackPanel>
@@ -131,12 +109,13 @@
                                 <DataTemplate>
                                     <StackPanel Margin="0,0,0,10">
                                         <!-- ComboBox for selecting the option -->
-                                        <ComboBox ItemsSource="{Binding DataContext.Options, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                      SelectedValue="{Binding OptionId, UpdateSourceTrigger=PropertyChanged}"
-                                      DisplayMemberPath="Name"
-                                      SelectedValuePath="Id" />
+                                        <ComboBox ItemsSource="{Binding DataContext.Options, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                        DisplayMemberPath="Name"
+                                                  SelectedItem="{Binding Option, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                      IsEnabled="True"
+                                                  />
                                         <!-- TextBox for entering the link value -->
-                                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0" />
+                                        <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -146,10 +125,6 @@
                     </StackPanel>
                 </ScrollViewer>
             </Border>
-
-            <!--<Button Grid.Column="1" Content="+" HorizontalAlignment="Left" Margin="15,0,0,0" Command="{Binding AddLinkCommand}" />-->
-
-            
 
         </Grid>
 

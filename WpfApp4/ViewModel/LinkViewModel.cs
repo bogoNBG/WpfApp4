@@ -1,26 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WpfApp4.Model;
 using WpfApp4.MVVM;
+using WpfApp4.Repository;
 
 namespace WpfApp4.ViewModel
 {
     class LinkViewModel : ViewModelBase
     {
-        private Link link;
+        private readonly MainRepository repository;
+        private readonly Link link;
+        private OptionViewModel option;
 
-        public LinkViewModel(Link link)
+        public LinkViewModel(Link link, MainRepository repository)
         {
             this.link = link;
+            this.repository = repository;
+
+            var option = this.repository.GetOptionByIdFromDB(this.link.OptionId);
+
+            if (option == null)
+            {
+                throw new Exception($"Cannot find option with ID = {this.link.OptionId}!");
+            }
+
+            this.Option = new OptionViewModel(option);
         }
 
         public int Id
         {
             get { return link.Id; }
-            set { link.Id = value; }
+            set
+            {
+                link.Id = value;
+                OnPropertyChanged();
+            }
         }
 
         public int ContactId
@@ -36,30 +49,28 @@ namespace WpfApp4.ViewModel
             }
         }
 
-        public int OptionId
+        public OptionViewModel Option
         {
-            get { return link.OptionId; }
+            get { return this.option; }
             set
             {
-                if (link.OptionId != value)
+                this.option = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public string Value
+        {
+            get { return link.Value; }
+            set
+            {
+                if (link.Value != value)
                 {
-                    link.OptionId = value;
+                    link.Value = value;
                     OnPropertyChanged();
                 }
             }
         }
 
-        public string Name
-        {
-            get { return link.Name; }
-            set
-            {
-                if (link.Name != value)
-                {
-                    link.Name = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
     }
 }

@@ -1,25 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WpfApp4.MVVM;
 
 namespace WpfApp4.Model
 {
-    internal class Link
+    internal class Link : ViewModelBase
     {
         public int Id { get; set; }
         public int ContactId { get; set; }
-
         public int OptionId { get; set; }
-        public string Name { get; set; }
+        public string Value { get; set; }
+        public bool IsAssigned { get; set; }
 
-        public Link(int id,int contactId, int optionId, string name)
+        public Link(int id,int contactId, int optionId, string value)
         {
             this.Id = id;
             this.ContactId = contactId;
             this.OptionId = optionId;
-            this.Name = name;
+            this.Value = value;
+            this.IsAssigned = false;
+        }
+
+        public Link(int contactId, string value)
+        {
+            this.ContactId = contactId;
+            this.Value = value;
         }
     }
 }

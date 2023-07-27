@@ -16,7 +16,7 @@ namespace WpfApp4.ViewModel
         {            
             Contacts = new ObservableCollection<ContactViewModel>();
             ShownContacts = Contacts;
-            Options = new ObservableCollection<Option>();
+            Options = new ObservableCollection<OptionViewModel>();
             Placeholder = "Search";
 
             Repository = new MainRepository();
@@ -26,7 +26,7 @@ namespace WpfApp4.ViewModel
         }
         MainRepository Repository { get; set; }
         public ObservableCollection<ContactViewModel> Contacts { get; set; }
-        public ObservableCollection<Option> Options { get; set; }
+        public ObservableCollection<OptionViewModel> Options { get; set; }
 
         public RelayCommand AddContactCommand => new(execution => AddContact());
         public RelayCommand RemoveContactCommand => new(execution => RemoveContact(), canExecute => CanRemoveContact());
@@ -155,8 +155,8 @@ namespace WpfApp4.ViewModel
             }
 		}
 
-        private Option selectedOption;
-        public Option SelectedOption
+        private OptionViewModel selectedOption;
+        public OptionViewModel SelectedOption
         {
             get { return selectedOption; }
             set 
@@ -197,9 +197,12 @@ namespace WpfApp4.ViewModel
 
         private void AddOption()
         {
-            Option option = new Option(Repository.IdNum("Options"), this.OptionName);
-            Options.Add(option);
+            Option option = new Option(this.OptionName);
+            //Options.Add(new OptionViewModel(option));
             Repository.AddOption(option);
+
+            Options.Clear();
+            Repository.GetOptionsFromDB(Options);
             OptionName = "";
         }
         private bool CanAddOption()
@@ -213,24 +216,13 @@ namespace WpfApp4.ViewModel
 
         private void RemoveOption()
         {
-            var contactsCopy = new List<ContactViewModel>(Contacts);
-            foreach (ContactViewModel contact in contactsCopy)
-            {
-                var newLinks = new List<LinkViewModel>(contact.Links);
 
-                foreach (LinkViewModel link in contact.Links)
-                {
-                    if (link.OptionId == SelectedOption.Id)
-                    {
-                        newLinks.Remove(link);
-                    }
-                }
-
-                contact.Links = newLinks;
-            }
             Repository.RemoveLinksFromOptions(SelectedOption);
             Repository.RemoveOption(SelectedOption);
-            Options.Remove(SelectedOption);
+            //Options.Remove(SelectedOption);
+
+            Options.Clear();
+            Repository.GetOptionsFromDB(Options);
             
         }
 
@@ -268,9 +260,10 @@ namespace WpfApp4.ViewModel
 
         private void AddLink()
         {
-            Link link = new(Repository.IdNum("Links"), SelectedContact.Id, 0, " ");
-            SelectedContact.Links.Add(new LinkViewModel(link));
-            Repository.AddLink(new LinkViewModel(link));
+            Link link = new(SelectedContact.Id, ""); //za doopravqne
+            //link.IsAssigned = false;
+            Repository.AddLink(link);
+            this.SelectedContact.RefreshLinks();
         }
         private bool CanAddLink()
         {
@@ -288,17 +281,21 @@ namespace WpfApp4.ViewModel
 
                 Repository.UpdateRow(SelectedContact);
 
-                var linksCopy = new List<LinkViewModel>(SelectedContact.Links);
                 foreach (LinkViewModel link in SelectedContact.Links)
                 {
-                    if (link.Name == "")
+                    if (link.Value == "")
                     {
-                        linksCopy.Remove(link);
                         Repository.RemoveLink(link);
                     }
-                    Repository.UpdateLink(link);
+                    else
+                    {
+                        Repository.UpdateLink(link);
+                    }
                 }
-                SelectedContact.Links = linksCopy;
+
+
+
+                this.SelectedContact.RefreshLinks();
 
                 SelectedContact = null;
 
@@ -308,9 +305,14 @@ namespace WpfApp4.ViewModel
             }
             else
             {
-                Contact contact = new Contact(Repository.IdNum("Contacts"), this.Name, this.Number, this.Email);
-                Contacts.Add(new ContactViewModel(contact));
+                Contact contact = new Contact(this.Name, this.Number, this.Email);
+                //Contacts.Add(new ContactViewModel(contact));
+
                 Repository.AddRow(contact);
+
+                Contacts.Clear();
+                Repository.GetContactsFromDB(Contacts);
+
                 Name = "";
                 Number = "";
                 Email = "";

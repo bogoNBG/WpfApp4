@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,14 @@ namespace WpfApp4.Model
         public Contact(int id, string name, string number, string email)
         {
             this.Id = id;
+            this.Name = name;
+            this.Number = number;
+            this.Email = email;
+            Links = new List<Link>();
+        }
+
+        public Contact(string name, string number, string email)
+        {
             this.Name = name;
             this.Number = number;
             this.Email = email;

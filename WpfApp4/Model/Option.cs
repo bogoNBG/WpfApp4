@@ -16,5 +16,10 @@ namespace WpfApp4.Model
             this.Id = id;
             this.Name = name;
         }
+
+        public Option(string name)
+        {
+            this.Name = name;
+        }
     }
 }

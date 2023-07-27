@@ -1,21 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using WpfApp4.Model;
 using WpfApp4.MVVM;
+using WpfApp4.Repository;
 
 namespace WpfApp4.ViewModel
 {
     class ContactViewModel : ViewModelBase
     {
-        private Contact contact;
+        private readonly MainRepository repository;
 
-        public ContactViewModel(Contact contact)
+        private Contact contact;
+        private ObservableCollection<LinkViewModel> links;
+        public ContactViewModel(Contact contact, MainRepository repository)
         {
+            this.repository = repository;
             this.contact = contact;
+            
+            
+
+            if (this.contact?.Links != null)
+            {
+                // this.links = new ObservableCollection<LinkViewModel>(this.contact.Links.Select(l => new LinkViewModel(l)));
+                this.links = new ObservableCollection<LinkViewModel>();
+
+                foreach (var link in this.contact.Links)
+                {
+                    this.links.Add(new LinkViewModel(link, this.repository));
+                }
+            }
         }
 
         public int Id
@@ -64,17 +76,22 @@ namespace WpfApp4.ViewModel
             }
         }
 
-        public List<LinkViewModel> Links
+        public ObservableCollection<LinkViewModel> Links
         {
-            get { return contact.Links; }
+            get { return this.links; }
             set
             {
-                if (contact.Links != value)
-                {
-                    contact.Links = value;
-                    OnPropertyChanged();
-                }
+                this.links = value;
+                OnPropertyChanged();
             }
         }
+
+        public void RefreshLinks()
+        {
+            this.Links.Clear();
+            this.repository.GetContactsLinksFromDB(contact, Links);
+        }
+
+
     }
 }

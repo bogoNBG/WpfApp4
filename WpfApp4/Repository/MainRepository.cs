@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using WpfApp4.Model;
@@ -66,7 +67,7 @@ namespace WpfApp4.Repository
 
         public void AddRow(Contact contact)
         {
-            commandLine = $"insert into Contacts (ID,NAME,NUMBER,EMAIL) values ({contact.Id},'{contact.Name}','{contact.Number}','{contact.Email}');";
+            commandLine = $"insert into Contacts (NAME,NUMBER,EMAIL) values ('{contact.Name}','{contact.Number}','{contact.Email}');";
             ConnectToTable(commandLine);
         }
         public void DeleteRow(ContactViewModel contact)
@@ -82,19 +83,19 @@ namespace WpfApp4.Repository
 
         public void AddOption(Option option)
         {
-            commandLine = $"insert into Options (ID, NAME) values ({option.Id}, '{option.Name}');";
+            commandLine = $"insert into Options (NAME) values ('{option.Name}');";
             ConnectToTable(commandLine);
         }
 
-        public void RemoveOption(Option option)
+        public void RemoveOption(OptionViewModel option)
         {
             commandLine = $"delete from Options where ID='{option.Id}'";
             ConnectToTable(commandLine);
         }
 
-        public void AddLink(LinkViewModel link)
+        public void AddLink(Link link)
         {
-            commandLine = $"insert into Links (ID, [CONTACT ID], [OPTION ID], NAME) VALUES ({link.Id}, {link.ContactId}, {link.OptionId}, '{link.Name}')";
+            commandLine = $"insert into Links ([CONTACT ID], [OPTION ID], NAME) VALUES ({link.ContactId}, {link.OptionId}, '{link.Value}')";
             ConnectToTable(commandLine);
         }
 
@@ -106,8 +107,98 @@ namespace WpfApp4.Repository
 
         public void UpdateLink(LinkViewModel link)
         {
-            commandLine = $"update Links set NAME='{link.Name}' where ID={link.Id}";
+            commandLine = $"update Links set NAME='{link.Value}' where ID={link.Id}";
             ConnectToTable(commandLine);
+        }
+
+        public void GetContactsLinksFromDB(Contact contact, ObservableCollection<LinkViewModel> links)
+        {
+            using (SQLiteConnection connection = new SQLiteConnection(dbfile))
+            {
+                connection.Open();
+                SQLiteCommand cmd = new SQLiteCommand($"select * from Links where [CONTACT ID] = {contact.Id}", connection);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    int id = reader.GetInt32(0);
+                    int contactId = reader.GetInt32(1);
+                    int optionId = reader.GetInt32(2);
+                    string name = reader.GetString(3);
+
+                    Link link = new Link(id, contactId, optionId, name);
+                    LinkViewModel link2 = new(link, this);
+                    links.Add(link2);
+                    contact.Links.Add(link);//dsadsa
+                    
+                }
+            }
+        }
+
+        public void GetOptionsFromDB(ObservableCollection<OptionViewModel> options)
+        {
+            using (SQLiteConnection connection = new SQLiteConnection(dbfile))
+            {
+                connection.Open();
+
+                string queryOptions = "SELECT ID, NAME FROM Options;";
+                SQLiteCommand commandOptions = new(queryOptions, connection);
+
+                SQLiteDataReader readerOptions = commandOptions.ExecuteReader();
+                while (readerOptions.Read())
+                {
+                    int id = readerOptions.GetInt32(0);
+                    string name = readerOptions.GetString(1);
+
+                    Option option = new(id, name);
+                    options.Add(new OptionViewModel(option));
+                }
+            }
+        }
+
+        public Option GetOptionByIdFromDB(int optionId)
+        {
+            using (SQLiteConnection connection = new SQLiteConnection(dbfile))
+            {
+                connection.Open();
+
+                string queryOptions = $"SELECT ID, NAME FROM Options where id = {optionId};";
+                SQLiteCommand commandOptions = new(queryOptions, connection);
+
+                SQLiteDataReader readerOptions = commandOptions.ExecuteReader();
+                while (readerOptions.Read())
+                {
+                    int id = readerOptions.GetInt32(0);
+                    string name = readerOptions.GetString(1);
+
+                    return new(id, name);
+                }
+
+                return null;
+            }
+        }
+
+        public void GetContactsFromDB(ObservableCollection<ContactViewModel> contacts)
+        {
+            using (SQLiteConnection connection = new SQLiteConnection(dbfile))
+            {
+                connection.Open();
+
+                string queryContacts = "SELECT ID, NAME, NUMBER, EMAIL FROM Contacts;";
+                SQLiteCommand commandContacts = new(queryContacts, connection);
+
+
+                SQLiteDataReader readerContacts = commandContacts.ExecuteReader();
+                while (readerContacts.Read())
+                {
+                    int id = readerContacts.GetInt32(0);
+                    string name = readerContacts.GetString(1);
+                    string number = readerContacts.GetString(2);
+                    string email = readerContacts.GetString(3);
+
+                    Contact contact = new Contact(id, name, number, email);
+                    contacts.Add(new ContactViewModel(contact, this));
+                }
+            }
         }
 
         public void RemoveLinksFromContact(ContactViewModel contact)
@@ -116,13 +207,15 @@ namespace WpfApp4.Repository
             ConnectToTable(commandLine);
         }
 
-        public void RemoveLinksFromOptions(Option option)
+        public void RemoveLinksFromOptions(OptionViewModel option)
         {
             commandLine = $"delete from Links where [OPTION ID]={option.Id};";
             ConnectToTable(commandLine);
         }
 
-        public void LoadInfo(ObservableCollection<ContactViewModel> contacts, ObservableCollection<Option> options)
+
+
+        public void LoadInfo(ObservableCollection<ContactViewModel> contacts, ObservableCollection<OptionViewModel> options)
         {
             using (SQLiteConnection connection = new SQLiteConnection(dbfile))
             {
@@ -140,7 +233,7 @@ namespace WpfApp4.Repository
                     int id = readerOptions.GetInt32(0);
                     string name = readerOptions.GetString(1);
                     Option option = new Option(id, name);
-                    options.Add(option);
+                    options.Add(new OptionViewModel(option));
                 }
 
 
@@ -153,7 +246,7 @@ namespace WpfApp4.Repository
                     string number = readerContacts.GetString(2);
                     string email = readerContacts.GetString(3);
 
-                    Contact contact = new Contact(id, name, number, email);
+                    Contact contact = new(id, name, number, email);
 
 
                     string queryLinks = $"SELECT ID, [CONTACT ID], [OPTION ID], NAME FROM Links WHERE [CONTACT ID] = {contact.Id};";
@@ -166,43 +259,12 @@ namespace WpfApp4.Repository
                         int optionId = readerLinks.GetInt32(2);
                         string linkName = readerLinks.GetString(3);
 
-                        contact.Links.Add(new LinkViewModel(new Link(linkId, contactId, optionId, linkName)));
+                        contact.Links.Add(new Link(linkId, contactId, optionId, linkName));
                     }
 
-                    contacts.Add(new ContactViewModel(contact));
+                    contacts.Add(new ContactViewModel(contact, this));
                 }
             }
-        }
-
-        public int IdNum(string table)
-        {
-
-            using SQLiteConnection connection = new(dbfile);
-            connection.Open();
-
-            using (SQLiteCommand command = new SQLiteCommand($"SELECT ID FROM {table}", connection))
-            {
-                using (SQLiteDataReader reader = command.ExecuteReader())
-                {
-                    List<int> ids = new List<int>();
-
-                    while (reader.Read())
-                    {
-                        int id = reader.GetInt32(0);
-                        ids.Add(id);
-                    }
-
-                    for (int i = 1; i <= ids.Count + 1; i++)
-                    {
-                        if (!ids.Contains(i))
-                        {
-                            return i;
-                        }
-                    }
-
-                    return ids.Count + 1;
-                }
-            }
-        }
+        }       
     }
 }
