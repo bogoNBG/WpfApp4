@@ -10,19 +10,22 @@ namespace WpfApp4.Model
         public string Value { get; set; }
         public bool IsAssigned { get; set; }
 
+        public Link()
+        {
+        }
+
         public Link(int id,int contactId, int optionId, string value)
         {
             this.Id = id;
             this.ContactId = contactId;
             this.OptionId = optionId;
             this.Value = value;
-            this.IsAssigned = false;
+            this.IsAssigned = true;
         }
 
-        public Link(int contactId, string value)
+        public Link(int contactId)
         {
             this.ContactId = contactId;
-            this.Value = value;
         }
     }
 }

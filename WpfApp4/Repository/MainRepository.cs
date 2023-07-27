@@ -93,9 +93,9 @@ namespace WpfApp4.Repository
             ConnectToTable(commandLine);
         }
 
-        public void AddLink(Link link)
+        public void AddLink(LinkViewModel link)
         {
-            commandLine = $"insert into Links ([CONTACT ID], [OPTION ID], NAME) VALUES ({link.ContactId}, {link.OptionId}, '{link.Value}')";
+            commandLine = $"insert into Links ([CONTACT ID], [OPTION ID], NAME) VALUES ({link.ContactId}, {link.Option.Id}, '{link.Value}')";
             ConnectToTable(commandLine);
         }
 
@@ -170,7 +170,7 @@ namespace WpfApp4.Repository
                     int id = readerOptions.GetInt32(0);
                     string name = readerOptions.GetString(1);
 
-                    return new(id, name);
+                    return new Option(id, name);
                 }
 
                 return null;

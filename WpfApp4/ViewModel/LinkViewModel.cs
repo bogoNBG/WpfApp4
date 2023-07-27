@@ -18,12 +18,12 @@ namespace WpfApp4.ViewModel
 
             var option = this.repository.GetOptionByIdFromDB(this.link.OptionId);
 
-            if (option == null)
+            if (option != null)
             {
-                throw new Exception($"Cannot find option with ID = {this.link.OptionId}!");
+                this.Option = new OptionViewModel(option);
             }
 
-            this.Option = new OptionViewModel(option);
+            //this.Option = new OptionViewModel(option);
         }
 
         public int Id
@@ -64,13 +64,21 @@ namespace WpfApp4.ViewModel
             get { return link.Value; }
             set
             {
-                if (link.Value != value)
-                {
-                    link.Value = value;
-                    OnPropertyChanged();
-                }
+                link.Value = value;
+                OnPropertyChanged();                
             }
         }
+
+        public bool IsAssigned
+        {
+            get { return link.IsAssigned; }
+            set 
+            {
+                link.IsAssigned = value; 
+                OnPropertyChanged(); 
+            }
+        }
+
 
     }
 }

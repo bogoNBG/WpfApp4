@@ -7,6 +7,7 @@ using WpfApp4.Model;
 using WpfApp4.MVVM;
 using WpfApp4.Repository;
 using System.Windows;
+using System.Security.RightsManagement;
 
 namespace WpfApp4.ViewModel
 {
@@ -18,6 +19,7 @@ namespace WpfApp4.ViewModel
             ShownContacts = Contacts;
             Options = new ObservableCollection<OptionViewModel>();
             Placeholder = "Search";
+            LinksToAddToDB = new List<Link>();
 
             Repository = new MainRepository();
             Repository.CreateTables();
@@ -27,6 +29,8 @@ namespace WpfApp4.ViewModel
         MainRepository Repository { get; set; }
         public ObservableCollection<ContactViewModel> Contacts { get; set; }
         public ObservableCollection<OptionViewModel> Options { get; set; }
+
+        public List<Link> LinksToAddToDB { get; set; }
 
         public RelayCommand AddContactCommand => new(execution => AddContact());
         public RelayCommand RemoveContactCommand => new(execution => RemoveContact(), canExecute => CanRemoveContact());
@@ -166,6 +170,9 @@ namespace WpfApp4.ViewModel
             }
         }
 
+        
+
+
         private void AddContact()
         {
             SelectedContact = null;
@@ -250,20 +257,16 @@ namespace WpfApp4.ViewModel
             }
         }
 
-        //private void AddLink()
-        //{
-        //    Link link = new Link(Repository.IdNum("Links"), SelectedContact.Id, SelectedOption.Id, LinkName);
-        //    SelectedContact.Links.Add(link);
-        //    Repository.AddLink(link);
-        //    LinkName = "";            
-        //}
-
         private void AddLink()
         {
-            Link link = new(SelectedContact.Id, ""); //za doopravqne
+
             //link.IsAssigned = false;
-            Repository.AddLink(link);
-            this.SelectedContact.RefreshLinks();
+            // Repository.AddLink(link);
+            // this.SelectedContact.RefreshLinks();
+            LinkViewModel linkvm = new(new Link(SelectedContact.Id), this.Repository);
+            linkvm.IsAssigned = false;
+            this.SelectedContact.Links.Add(linkvm);
+            //LinksToAddToDB.Add()
         }
         private bool CanAddLink()
         {
@@ -281,15 +284,29 @@ namespace WpfApp4.ViewModel
 
                 Repository.UpdateRow(SelectedContact);
 
-                foreach (LinkViewModel link in SelectedContact.Links)
+                
+
+                foreach (LinkViewModel link in this.SelectedContact.Links)
                 {
                     if (link.Value == "")
                     {
                         Repository.RemoveLink(link);
+                        this.SelectedContact.Links.Remove(link);
                     }
-                    else
+                    else if(link.Value != "")
                     {
                         Repository.UpdateLink(link);
+                    }
+                }
+
+
+
+                foreach (LinkViewModel link in SelectedContact.Links)
+                {
+                    if (link.Option != null && link.IsAssigned == false)
+                    {
+                        Repository.AddLink(link);
+                        link.IsAssigned = true;
                     }
                 }
 
@@ -306,7 +323,6 @@ namespace WpfApp4.ViewModel
             else
             {
                 Contact contact = new Contact(this.Name, this.Number, this.Email);
-                //Contacts.Add(new ContactViewModel(contact));
 
                 Repository.AddRow(contact);
 
