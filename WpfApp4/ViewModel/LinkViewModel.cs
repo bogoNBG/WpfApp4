@@ -22,8 +22,6 @@ namespace WpfApp4.ViewModel
             {
                 this.Option = new OptionViewModel(option);
             }
-
-            //this.Option = new OptionViewModel(option);
         }
 
         public int Id
