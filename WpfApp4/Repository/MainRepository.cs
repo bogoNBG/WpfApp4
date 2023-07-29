@@ -73,14 +73,14 @@ namespace WpfApp4.Repository
             commandLine = $"insert into Contacts (NAME,NUMBER,EMAIL) values ('{contact.Name}','{contact.Number}','{contact.Email}');";
             ConnectToTable(commandLine);
         }
-        public void DeleteRow(ContactViewModel contact)
+        public void DeleteRow(int contactId)
         {
-            commandLine = $"delete from Contacts where ID={contact.Id};";
+            commandLine = $"delete from Contacts where ID={contactId};";
             ConnectToTable(commandLine);
         }
-        public void UpdateRow(ContactViewModel contact)
+        public void UpdateRow(string name, string number, string email, int contactId)
         {
-            commandLine = $"update Contacts set NAME='{contact.Name}', NUMBER='{contact.Number}', EMAIL='{contact.Email}' where ID={contact.Id}";
+            commandLine = $"update Contacts set NAME='{name}', NUMBER='{number}', EMAIL='{email}' where ID={contactId}";
             ConnectToTable(commandLine);
         }
 
@@ -90,44 +90,45 @@ namespace WpfApp4.Repository
             ConnectToTable(commandLine);
         }
 
-        public void RemoveOption(OptionViewModel option)
+        public void RemoveOption(int optionId)
         {
-            commandLine = $"delete from Options where ID='{option.Id}'";
+            commandLine = $"delete from Options where ID='{optionId}'";
             ConnectToTable(commandLine);
         }
 
-        public void AddLink(LinkViewModel link)
+        public void AddLink(int contactId, int optionId, string linkValue)
         {
-            commandLine = $"insert into Links ([CONTACT ID], [OPTION ID], NAME) VALUES ({link.ContactId}, {link.Option.Id}, '{link.Value}')";
+            commandLine = $"insert into Links ([CONTACT ID], [OPTION ID], NAME) VALUES ({contactId},{optionId},'{linkValue}')"; //moje da izbie
             ConnectToTable(commandLine);
         }
 
-        public void RemoveLink(LinkViewModel link)
+        public void RemoveLink(int linkId)
         {
-            commandLine = $"delete from Links where ID={link.Id};";
+            commandLine = $"delete from Links where ID={linkId};";
             ConnectToTable(commandLine);
         }
 
-        public void UpdateLink(LinkViewModel link)
+        public void UpdateLink(string linkValue, int linkId)
         {
-            commandLine = $"update Links set NAME='{link.Value}' where ID={link.Id}";
+            commandLine = $"update Links set NAME='{linkValue}' where ID={linkId}";
             ConnectToTable(commandLine);
         }
 
-        public void RemoveLinksFromContact(ContactViewModel contact)
+        public void RemoveLinksFromContact(int contactId)
         {
-            commandLine = $"delete from Links where [CONTACT ID]={contact.Id};";
+            commandLine = $"delete from Links where [CONTACT ID]={contactId};";
             ConnectToTable(commandLine);
         }
 
-        public void RemoveLinksFromOptions(OptionViewModel option)
+        public void RemoveLinksFromOptions(int optionId) //ti
         {
-            commandLine = $"delete from Links where [OPTION ID]={option.Id};";
+            commandLine = $"delete from Links where [OPTION ID]={optionId};";
             ConnectToTable(commandLine);
         }
 
-        public void GetContactsLinksFromDB(Contact contact, ObservableCollection<LinkViewModel> links)
+        public List<Link> GetContactsLinksFromDB(Contact contact)
         {
+            List<Link> links = new();
             using (SQLiteConnection connection = new SQLiteConnection(dbfile))
             {
                 connection.Open();
@@ -141,13 +142,12 @@ namespace WpfApp4.Repository
                         int optionId = reader.GetInt32(2);
                         string name = reader.GetString(3);
 
-                        Link link = new Link(id, contactId, optionId, name);
-                        LinkViewModel link2 = new(link, this);
-                        links.Add(link2);
+                        links.Add(new Link(id, contactId, optionId, name));
                     }
                 }
                 
             }
+            return links;
         }
 
         public List<Option> GetOptionsFromDB() //return List<Option>

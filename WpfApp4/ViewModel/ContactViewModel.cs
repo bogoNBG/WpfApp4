@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using WpfApp4.Model;
 using WpfApp4.MVVM;
 using WpfApp4.Repository;
@@ -89,7 +90,19 @@ namespace WpfApp4.ViewModel
         public void RefreshLinks()
         {
             this.Links.Clear();
-            this.repository.GetContactsLinksFromDB(contact, Links);
+            this.Links = ConvertToLinkViewModels(repository.GetContactsLinksFromDB(contact));
+            OnPropertyChanged(nameof(this.Links));
+            
+        }
+
+        public ObservableCollection<LinkViewModel> ConvertToLinkViewModels(List<Link> links)
+        {
+            ObservableCollection<LinkViewModel> viewModels = new();
+            foreach (Link link in links)
+            {
+                viewModels.Add(new LinkViewModel(link, repository));
+            }
+            return viewModels;
         }
 
 

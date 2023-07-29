@@ -221,8 +221,8 @@ namespace WpfApp4.ViewModel
 
         private void RemoveContact()
         {
-            Repository.DeleteRow(SelectedContact);
-            Repository.RemoveLinksFromContact(SelectedContact);
+            Repository.DeleteRow(SelectedContact.Id);
+            Repository.RemoveLinksFromContact(SelectedContact.Id);
             Contacts.Remove(SelectedContact);
 
             Name = "";
@@ -264,8 +264,8 @@ namespace WpfApp4.ViewModel
         private void RemoveOption()
         {
 
-            Repository.RemoveLinksFromOptions(SelectedOption);
-            Repository.RemoveOption(SelectedOption);
+            Repository.RemoveLinksFromOptions(SelectedOption.Id);
+            Repository.RemoveOption(SelectedOption.Id);
 
             LoadOptions();
 
@@ -321,7 +321,7 @@ namespace WpfApp4.ViewModel
                 SelectedContact.Number = Number;
                 SelectedContact.Email = Email;
 
-                Repository.UpdateRow(SelectedContact);
+                Repository.UpdateRow(SelectedContact.Name, SelectedContact.Number, SelectedContact.Email, SelectedContact.Id);
 
                 
 
@@ -329,11 +329,11 @@ namespace WpfApp4.ViewModel
                 {
                     if (string.IsNullOrWhiteSpace(link.Value))
                     {
-                        Repository.RemoveLink(link);
+                        Repository.RemoveLink(link.Id);
                     }
                     else
                     {
-                        Repository.UpdateLink(link);
+                        Repository.UpdateLink(link.Value, link.Id);
                     }
                 }
 
@@ -343,7 +343,7 @@ namespace WpfApp4.ViewModel
                 {
                     if (link.Option != null && !string.IsNullOrWhiteSpace(link.Value) && link.IsAssigned == false)
                     {
-                        Repository.AddLink(link);
+                        Repository.AddLink(link.ContactId, link.Option.Id, link.Value);
                         link.IsAssigned = true;
                     }
                 }
