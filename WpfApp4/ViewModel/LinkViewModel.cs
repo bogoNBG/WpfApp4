@@ -67,12 +67,12 @@ namespace WpfApp4.ViewModel
             }
         }
 
-        public bool IsAssigned
+        public bool IsNotAssigned
         {
-            get { return link.IsAssigned; }
+            get { return link.IsNotAssigned; }
             set 
             {
-                link.IsAssigned = value; 
+                link.IsNotAssigned = value; 
                 OnPropertyChanged(); 
             }
         }

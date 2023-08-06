@@ -304,7 +304,7 @@ namespace WpfApp4.ViewModel
         private void AddLink()
         {           
             LinkViewModel linkvm = new(new Link(SelectedContact.Id), this.Repository);
-            linkvm.IsAssigned = false;
+            linkvm.IsNotAssigned = true;
             this.SelectedContact.Links.Add(linkvm);
         }
         private bool CanAddLink()
@@ -341,10 +341,10 @@ namespace WpfApp4.ViewModel
 
                 foreach (LinkViewModel link in this.SelectedContact.Links)
                 {
-                    if (link.Option != null && !string.IsNullOrWhiteSpace(link.Value) && link.IsAssigned == false)
+                    if (link.Option != null && !string.IsNullOrWhiteSpace(link.Value) && link.IsNotAssigned == true)
                     {
                         Repository.AddLink(link.ContactId, link.Option.Id, link.Value);
-                        link.IsAssigned = true;
+                        link.IsNotAssigned = false;
                     }
                 }
 
